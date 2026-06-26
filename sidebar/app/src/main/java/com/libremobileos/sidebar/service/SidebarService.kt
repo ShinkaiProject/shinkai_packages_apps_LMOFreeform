@@ -45,11 +45,22 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private var screenHeight = 0
     private val layoutParams = LayoutParams()
     private val handler = Handler()
+    private var autoHideRunnable: Runnable? = null
     private val sideLineView by lazy {
         val gestureManager = MGestureManager(this@SidebarService, GestureListener(this@SidebarService))
         View(this).apply {
             background = AppCompatResources.getDrawable(this@SidebarService, R.drawable.ic_line)
             setOnTouchListener { _, event ->
+            when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        cancelAutoHide()
+                        restoreSliderOpacity()
+                    }
+                    android.view.MotionEvent.ACTION_UP,
+                    android.view.MotionEvent.ACTION_CANCEL -> {
+                        scheduleAutoHide()
+                    }
+                }
                 gestureManager.onTouchEvent(event)
                 true
             }
@@ -84,6 +95,7 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         private const val DEFAULT_SIDELINE_HEIGHT = 200
         private const val OFFSET_PORTRAIT = 20
         private const val OFFSET_LANDSCAPE = 0
+        private const val AUTO_HIDE_ALPHA = 0.01f
 
         const val SLIDER_TRANSPARENCY = "slider_transparency"
         const val SLIDER_LENGTH = "slider_length"
@@ -101,6 +113,8 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         const val ACTION_GAME_START = "com.android.gamespace.action.GAME_START"
         const val ACTION_GAME_STOP = "com.android.gamespace.action.GAME_STOP"
         const val ACTION_SHOW_SIDEBAR = "com.android.gamespace.action.SHOW_SIDEBAR"
+        const val SIDEBAR_AUTO_HIDE_ENABLED = "sidebar_auto_hide_enabled"
+        const val SIDEBAR_AUTO_HIDE_TIMEOUT = "sidebar_auto_hide_timeout"
 
         //是否展示侧边条
         const val SIDELINE = "sideline"
@@ -162,6 +176,7 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 if (shouldShowService && isShowingSideline && !(isGameSpaceActive && hideOnGameSpace)) {
                     sideLineView.animate().cancel()
                     animateShowSideline()
+                    scheduleAutoHide()
                 }
             }
         })
@@ -255,6 +270,13 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             }
             SIDEBAR_HIDE_ON_GAMESPACE -> {
                 updateSidebarVisibility()
+            }
+            SIDEBAR_AUTO_HIDE_ENABLED, SIDEBAR_AUTO_HIDE_TIMEOUT -> {
+                if (isShowingSideline) {
+                    cancelAutoHide()
+                    restoreSliderOpacity()
+                    scheduleAutoHide()
+                }
             }
         }
     }
@@ -385,6 +407,7 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 windowManager.addView(sideLineView, layoutParams)
                 viewModel.registerCallbacks()
                 isShowingSideline = true
+                scheduleAutoHide()
             }.onFailure { e ->
                 logger.e("failed to add sideline view: ", e)
             }
@@ -435,6 +458,7 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         if (!isShowingSideline && !force) return
 
         logger.d("removeView")
+        cancelAutoHide()
         viewModel.unregisterCallbacks()
 
         handler.post {
@@ -482,6 +506,36 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private fun animateShowSideline() {
         logger.d("animateShowSideline")
         sideLineView.animate().translationX(0f).setDuration(300).start()
+    }
+
+    private fun scheduleAutoHide() {
+        if (!sharedPrefs.getBoolean(SIDEBAR_AUTO_HIDE_ENABLED, false)) return
+        cancelAutoHide()
+        val timeoutSec = sharedPrefs.getInt(SIDEBAR_AUTO_HIDE_TIMEOUT, 5)
+        val runnable = Runnable {
+            if (isShowingSideline) {
+                logger.d("autoHide: fading slider to $AUTO_HIDE_ALPHA")
+                sideLineView.animate()
+                    .alpha(AUTO_HIDE_ALPHA)
+                    .setDuration(400)
+                    .start()
+            }
+        }
+        autoHideRunnable = runnable
+        handler.postDelayed(runnable, timeoutSec * 1000L)
+    }
+
+    private fun cancelAutoHide() {
+        autoHideRunnable?.let { handler.removeCallbacks(it) }
+        autoHideRunnable = null
+    }
+
+    private fun restoreSliderOpacity() {
+        val targetAlpha = sharedPrefs.getFloat(SLIDER_TRANSPARENCY, 1.0f)
+        sideLineView.animate()
+            .alpha(targetAlpha)
+            .setDuration(200)
+            .start()
     }
 
     private fun setIntSp(name: String, value: Int) {

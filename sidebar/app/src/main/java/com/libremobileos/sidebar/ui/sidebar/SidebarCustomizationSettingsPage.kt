@@ -45,6 +45,8 @@ fun SidebarCustomizationSettingsPage(
     var tapToOpen by remember { mutableStateOf(sharedPrefs.getBoolean("sidebar_tap_to_open", false)) }
     var swipeToOpen by remember { mutableStateOf(sharedPrefs.getBoolean("sidebar_swipe_to_open", true)) }
     var hideOnGameSpace by remember { mutableStateOf(sharedPrefs.getBoolean("sidebar_hide_on_gamespace", false)) }
+    var autoHideEnabled by remember { mutableStateOf(sharedPrefs.getBoolean("sidebar_auto_hide_enabled", false)) }
+    var autoHideTimeout by remember { mutableStateOf(sharedPrefs.getInt("sidebar_auto_hide_timeout", 5)) }
 
     CompositionLocalProvider(LocalNavController provides remember {
         object : NavControllerWrapper {
@@ -435,6 +437,53 @@ fun SidebarCustomizationSettingsPage(
                                     )
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Switch(
+                                    checked = autoHideEnabled,
+                                    onCheckedChange = {
+                                        autoHideEnabled = it
+                                        sharedPrefs.edit().putBoolean("sidebar_auto_hide_enabled", autoHideEnabled).apply()
+                                        onSettingChanged()
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(text = stringResource(R.string.sidebar_auto_hide_title))
+                                    Text(
+                                        text = stringResource(R.string.sidebar_auto_hide_summary),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            if (autoHideEnabled) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(text = stringResource(R.string.sidebar_auto_hide_timeout_value, autoHideTimeout))
+                                Text(
+                                    text = stringResource(R.string.sidebar_auto_hide_timeout_summary),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                                Slider(
+                                    value = autoHideTimeout.toFloat(),
+                                    onValueChange = {
+                                        autoHideTimeout = it.toInt()
+                                        sharedPrefs.edit().putInt("sidebar_auto_hide_timeout", autoHideTimeout).apply()
+                                        onSettingChanged()
+                                    },
+                                    valueRange = 3f..15f,
+                                    steps = 11,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }
@@ -458,6 +507,8 @@ fun SidebarCustomizationSettingsPage(
                             tapToOpen = false
                             swipeToOpen = true
                             hideOnGameSpace = false
+                            autoHideEnabled = false
+                            autoHideTimeout = 5
                             
                             sharedPrefs.edit()
                                 .putFloat("slider_transparency", transparency)
@@ -474,6 +525,8 @@ fun SidebarCustomizationSettingsPage(
                                 .putBoolean("sidebar_tap_to_open", tapToOpen)
                                 .putBoolean("sidebar_swipe_to_open", swipeToOpen)
                                 .putBoolean("sidebar_hide_on_gamespace", hideOnGameSpace)
+                                .putBoolean("sidebar_auto_hide_enabled", autoHideEnabled)
+                                .putInt("sidebar_auto_hide_timeout", autoHideTimeout)
                                 .apply()
                             onSettingChanged()
                         },
