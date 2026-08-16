@@ -98,8 +98,9 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         const val SIDEBAR_TAP_TO_OPEN = "sidebar_tap_to_open"
         const val SIDEBAR_SWIPE_TO_OPEN = "sidebar_swipe_to_open"
         const val SIDEBAR_HIDE_ON_GAMESPACE = "sidebar_hide_on_gamespace"
-        const val ACTION_GAME_START = "io.chaldeaprjkt.gamespace.action.GAME_START"
-        const val ACTION_GAME_STOP = "io.chaldeaprjkt.gamespace.action.GAME_STOP"
+        const val ACTION_GAME_START = "com.android.gamespace.action.GAME_START"
+        const val ACTION_GAME_STOP = "com.android.gamespace.action.GAME_STOP"
+        const val ACTION_SHOW_SIDEBAR = "com.android.gamespace.action.SHOW_SIDEBAR"
 
         //是否展示侧边条
         const val SIDELINE = "sideline"
@@ -169,6 +170,11 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         val autoEnabled = sharedPrefs.getBoolean(SidebarMonitorService.KEY_AUTO_ENABLED_TEMP, false)
         val shouldShow = showSideline || autoEnabled
         
+        if (intent?.action == ACTION_SHOW_SIDEBAR) {
+            logger.d("onStartCommand: show sidebar requested from GameSpace")
+            showSidebar()
+        }
+
         logger.d("screenWidth=$screenWidth screenHeight=$screenHeight showSideline=$showSideline autoEnabled=$autoEnabled")
         if (shouldShow) showView()
         return START_STICKY
