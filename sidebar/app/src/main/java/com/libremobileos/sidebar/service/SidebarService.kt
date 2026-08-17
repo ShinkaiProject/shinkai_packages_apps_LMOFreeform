@@ -261,6 +261,7 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     override fun showSidebar() {
         logger.d("showSidebar")
+        viewModel.registerCallbacks()
         sidebarView.showView()
         isShowingSidebar = true
         animateHideSideline()
