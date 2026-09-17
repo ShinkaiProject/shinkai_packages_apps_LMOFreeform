@@ -1,27 +1,21 @@
 package com.libremobileos.sidebar.ui.sidebar
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.core.view.WindowCompat
-import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
 
 /**
  * @author KindBrave
  * @since 2023/10/21
  */
-class SidebarSettingsActivity : ComponentActivity() {
-    private val viewModel: SidebarSettingsViewModel by viewModels { SidebarSettingsViewModel.Factory }
+class SidebarSettingsActivity : CollapsingToolbarBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        setContent {
-            SettingsTheme {
-                SidebarSettingsPage(viewModel = viewModel)
-            }
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(com.android.settingslib.collapsingtoolbar.R.id.content_frame, SidebarSettingsFragment())
+                .commit()
         }
     }
 }

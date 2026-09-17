@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="slider_settings"
+        android:title="@string/sidebar_section_slider"
+        app:iconSpaceReserved="false">
+
+        <com.libremobileos.sidebar.preference.FloatSliderPreference
+            android:key="slider_transparency"
+            android:title="@string/sidebar_transparency_value"
+            android:defaultValue="0.8"
+            app:floatMin="0.1"
+            app:floatMax="1.0"
+            app:floatStep="0.1"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="slider_length"
+            android:title="@string/sidebar_length_value"
+            android:defaultValue="200"
+            app:min="100"
+            android:max="500"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="slider_width"
+            android:title="@string/sidebar_width_value"
+            android:defaultValue="100"
+            app:min="20"
+            android:max="200"
+            app:iconSpaceReserved="false" />
+
+        <com.libremobileos.sidebar.preference.IntegerListPreference
+            android:key="sideline_position_x"
+            android:title="@string/sidebar_position_label"
+            android:entries="@array/sidebar_position_entries"
+            android:entryValues="@array/sidebar_position_values"
+            android:defaultValue="1"
+            android:summary="%s"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="layout_settings"
+        android:title="@string/sidebar_section_layout"
+        app:iconSpaceReserved="false">
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="sidebar_columns"
+            android:title="@string/sidebar_columns_value"
+            android:defaultValue="1"
+            app:min="1"
+            android:max="3"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="sidebar_icon_size"
+            android:title="@string/sidebar_icon_size_value"
+            android:defaultValue="40"
+            app:min="30"
+            android:max="80"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="sidebar_icon_padding"
+            android:title="@string/sidebar_icon_padding_value"
+            android:summary="@string/sidebar_icon_padding_summary"
+            android:defaultValue="7"
+            app:min="4"
+            android:max="20"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="sidebar_column_spacing"
+            android:title="@string/sidebar_column_spacing_value"
+            android:summary="@string/sidebar_column_spacing_summary"
+            android:defaultValue="4"
+            app:min="1"
+            android:max="12"
+            app:iconSpaceReserved="false" />
+
+        <com.libremobileos.sidebar.preference.FloatSliderPreference
+            android:key="sidebar_corner_radius"
+            android:title="@string/sidebar_corner_radius_value"
+            android:defaultValue="24.0"
+            app:floatMin="0.0"
+            app:floatMax="32.0"
+            app:floatStep="1.0"
+            app:iconSpaceReserved="false" />
+
+        <com.libremobileos.sidebar.preference.FloatSliderPreference
+            android:key="sidebar_background_transparency"
+            android:title="@string/sidebar_bg_transparency_value"
+            android:defaultValue="0.8"
+            app:floatMin="0.1"
+            app:floatMax="1.0"
+            app:floatStep="0.1"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="visual_effects"
+        android:title="@string/sidebar_section_visual"
+        app:iconSpaceReserved="false">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_show_shadow"
+            android:title="@string/sidebar_drop_shadow_title"
+            android:summary="@string/sidebar_drop_shadow_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="miscellaneous"
+        android:title="@string/sidebar_section_miscellaneous"
+        app:iconSpaceReserved="false">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_tap_to_open"
+            android:title="@string/sidebar_tap_to_open_title"
+            android:summary="@string/sidebar_tap_to_open_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_swipe_to_open"
+            android:title="@string/sidebar_swipe_to_open_title"
+            android:summary="@string/sidebar_swipe_to_open_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_hide_on_gamespace"
+            android:title="@string/sidebar_hide_on_gamespace_title"
+            android:summary="@string/sidebar_hide_on_gamespace_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_auto_hide_enabled"
+            android:title="@string/sidebar_auto_hide_title"
+            android:summary="@string/sidebar_auto_hide_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <com.android.settingslib.widget.SliderPreference
+            android:key="sidebar_auto_hide_timeout"
+            android:title="@string/sidebar_auto_hide_timeout_value"
+            android:summary="@string/sidebar_auto_hide_timeout_summary"
+            android:dependency="sidebar_auto_hide_enabled"
+            android:defaultValue="5"
+            app:min="3"
+            android:max="15"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:key="sidebar_reset_defaults"
+        android:title="@string/sidebar_reset_defaults"
+        app:iconSpaceReserved="false" />
+
+</PreferenceScreen>

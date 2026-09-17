@@ -1,4 +1,2 @@
 <resources>
-    <style name="Theme.Light" parent="Theme.Material3.Light" />
-    <style name="Theme.Dark" parent="Theme.Material3.Dark" />
 </resources>

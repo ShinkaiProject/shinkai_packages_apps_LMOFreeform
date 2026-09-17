@@ -3,272 +3,159 @@
  * SPDX-FileCopyrightText: 2026 kenway214
  * SPDX-License-Identifier: Apache-2.0
  */
- 
+
 package com.libremobileos.sidebar.ui.sidebar
 
-import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
-import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
-import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.widget.preference.SwitchPreference
-import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
-import com.android.settingslib.spa.widget.ui.Category
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.preference.Preference
+import androidx.preference.SwitchPreferenceCompat
+import com.android.settingslib.widget.SettingsBasePreferenceFragment
 import com.libremobileos.sidebar.R
 import com.libremobileos.sidebar.app.SidebarApplication
-import com.libremobileos.sidebar.ui.theme.SidebarTheme
-import com.android.settingslib.spa.framework.compose.LocalNavController
-import com.android.settingslib.spa.framework.compose.NavControllerWrapper
-import androidx.compose.runtime.CompositionLocalProvider
+import com.libremobileos.sidebar.preference.ConfigDataStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SidebarPerAppConfigFragment : Fragment() {
+class SidebarPerAppConfigFragment : SettingsBasePreferenceFragment() {
 
     companion object {
         const val PREF_AUTO_APPS = "sidebar_auto_apps"
+        private const val KEY_INFO = "info"
+        private const val KEY_RELOAD = "reloading"
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                SidebarTheme {
-                    val activity = LocalContext.current as? Activity
-                    SidebarPerAppConfigScreen(onBack = { activity?.finish() })
+    private lateinit var sharedPrefs: SharedPreferences
+    private val appPreferences = mutableListOf<SwitchPreferenceCompat>()
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.menu_per_app, menu)
+            val searchItem = menu.findItem(R.id.search)
+            val searchView = searchItem.actionView as? SearchView
+            searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextChange(newText: String): Boolean {
+                    filterApps(newText)
+                    return true
                 }
+
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    return true
+                }
+            })
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean = false
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.title = getString(R.string.sidebar_per_app_config)
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        preferenceManager.preferenceDataStore = ConfigDataStore(requireContext())
+        sharedPrefs = requireContext()
+            .getSharedPreferences(SidebarApplication.CONFIG, Context.MODE_PRIVATE)
+        setPreferencesFromResource(R.xml.per_app_settings, rootKey)
+        populateApps()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun populateApps() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val apps = loadInstalledApps(requireContext())
+            withContext(Dispatchers.Main) {
+                addAppPreferences(apps)
             }
         }
     }
-}
 
-@Composable
-fun SidebarPerAppConfigContent(onBack: () -> Unit = {}) {
-    SidebarPerAppConfigScreen(onBack = onBack)
-}
-
-@Composable
-fun SidebarPerAppConfigScreen(onBack: () -> Unit = {}) {
-    val context = LocalContext.current
-    val sharedPrefs = context.getSharedPreferences(SidebarApplication.CONFIG, Context.MODE_PRIVATE)
-    
-    var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
-    var searchQuery by remember { mutableStateOf("") }
-    
-    LaunchedEffect(Unit) {
-        val loadedApps = withContext(Dispatchers.IO) {
-            loadInstalledApps(context)
+    private fun addAppPreferences(entries: List<AppEntry>) {
+        val autoApps = sharedPrefs.getStringSet(PREF_AUTO_APPS, emptySet()) ?: emptySet()
+        appPreferences.clear()
+        entries.forEach { entry ->
+            val pref = SwitchPreferenceCompat(requireContext()).apply {
+                key = entry.packageName
+                title = entry.label
+                summary = entry.packageName
+                icon = entry.icon
+                isChecked = autoApps.contains(entry.packageName)
+                isPersistent = false
+                setOnPreferenceChangeListener { _, newValue ->
+                    updateAutoApps(newValue as Boolean, entry.packageName)
+                    true
+                }
+            }
+            appPreferences.add(pref)
+            preferenceScreen.addPreference(pref)
         }
-        apps = loadedApps
     }
-    
-    val filteredApps = remember(apps, searchQuery) {
-        if (searchQuery.isBlank()) {
-            apps
+
+    private fun updateAutoApps(enabled: Boolean, packageName: String) {
+        val current = sharedPrefs.getStringSet(PREF_AUTO_APPS, emptySet())
+            ?.toMutableSet() ?: mutableSetOf()
+        if (enabled) {
+            current.add(packageName)
         } else {
-            apps.filter { app ->
-                app.label.contains(searchQuery, ignoreCase = true) ||
-                app.packageName.contains(searchQuery, ignoreCase = true)
+            current.remove(packageName)
+        }
+        sharedPrefs.edit().putStringSet(PREF_AUTO_APPS, current).apply()
+    }
+
+    private fun filterApps(query: String) {
+        val normalized = query.trim().lowercase()
+        appPreferences.forEach { pref ->
+            pref.isVisible = if (normalized.isEmpty()) {
+                true
+            } else {
+                pref.title?.toString()?.lowercase()?.contains(normalized) == true ||
+                    pref.summary?.toString()?.lowercase()?.contains(normalized) == true
             }
         }
     }
 
-    CompositionLocalProvider(LocalNavController provides remember {
-        object : NavControllerWrapper {
-            override fun navigate(route: String, popUpCurrent: Boolean) {}
-            override fun navigateBack() { onBack() }
-        }
-    }) {
-        SettingsScaffold(
-            title = stringResource(R.string.sidebar_per_app_config)
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                Category(title = stringResource(R.string.sidebar_per_app_config)) {
-                    Text(
-                        text = stringResource(R.string.sidebar_auto_enable_selected_apps_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp
-                        )
-                    )
-                    
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        label = { Text("Search apps") },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "Search"
-                            )
-                        },
-                        trailingIcon = if (searchQuery.isNotEmpty()) {
-                            {
-                                IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(
-                                        Icons.Default.Clear,
-                                        contentDescription = "Clear search"
-                                      )
-                                }
-                            }
-                        } else null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = 16.dp,
-                                end = 16.dp,
-                                bottom = 8.dp
-                            ),
-                        singleLine = true
-                    )
-                    
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 8.dp,
-                            bottom = 16.dp
-                        )
-                    ) {
-                        items(filteredApps) { appInfo ->
-                            SidebarPerAppListItem(
-                                appInfo = appInfo,
-                                sharedPrefs = sharedPrefs
-                            )
-                        }
-                    }
-                }
+    private suspend fun loadInstalledApps(context: Context): List<AppEntry> = withContext(Dispatchers.IO) {
+        val pm = context.packageManager
+        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        apps.asSequence()
+            .filter { app ->
+                (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0 &&
+                    app.packageName != context.packageName
             }
-        }
-    }
-}
-
-@Composable
-fun SidebarPerAppListItem(
-    appInfo: AppInfo,
-    sharedPrefs: android.content.SharedPreferences
-) {
-    val autoApps = sharedPrefs.getStringSet(SidebarPerAppConfigFragment.PREF_AUTO_APPS, emptySet()) ?: emptySet()
-    var isChecked by rememberSaveable { mutableStateOf(autoApps.contains(appInfo.packageName)) }
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-    ) {
-        // App icon
-        Image(
-            painter = rememberDrawablePainter(appInfo.icon),
-            contentDescription = appInfo.label,
-            modifier = Modifier.size(48.dp)
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        // App info column
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            // App name - now properly themed
-            Text(
-                text = appInfo.label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            
-            // Package name - now properly themed
-            Text(
-                text = appInfo.packageName,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        
-        // Switch
-        Switch(
-            checked = isChecked,
-            onCheckedChange = { newValue ->
-                isChecked = newValue
-                val currentAutoApps = sharedPrefs.getStringSet(SidebarPerAppConfigFragment.PREF_AUTO_APPS, emptySet())?.toMutableSet() ?: mutableSetOf()
-                
-                if (newValue) {
-                    currentAutoApps.add(appInfo.packageName)
-                } else {
-                    currentAutoApps.remove(appInfo.packageName)
-                }
-                
-                sharedPrefs.edit()
-                    .putStringSet(SidebarPerAppConfigFragment.PREF_AUTO_APPS, currentAutoApps)
-                    .apply()
+            .map { app ->
+                AppEntry(
+                    label = app.loadLabel(pm).toString(),
+                    packageName = app.packageName,
+                    icon = app.loadIcon(pm)
+                )
             }
-        )
+            .sortedBy { it.label.lowercase() }
+            .toList()
     }
-}
 
-data class AppInfo(
-    val label: String,
-    val packageName: String,
-    val icon: android.graphics.drawable.Drawable
-)
-
-private suspend fun loadInstalledApps(context: Context): List<AppInfo> = withContext(Dispatchers.IO) {
-    val pm = context.packageManager
-    val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-    
-    apps.asSequence()
-        .filter { app ->
-            // Filter out system apps and the current app
-            (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0 && 
-            app.packageName != context.packageName
-        }
-        .map { app ->
-            AppInfo(
-                label = app.loadLabel(pm).toString(),
-                packageName = app.packageName,
-                icon = app.loadIcon(pm)
-            )
-        }
-        .sortedBy { it.label.lowercase() }
-        .toList()
+    private data class AppEntry(
+        val label: String,
+        val packageName: String,
+        val icon: Drawable
+    )
 }

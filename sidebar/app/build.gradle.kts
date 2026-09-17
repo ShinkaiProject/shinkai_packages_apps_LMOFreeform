@@ -11,7 +11,6 @@ android {
     compileSdk = 34
 
     buildFeatures {
-        dataBinding = true
         compose = true
     }
 
@@ -57,6 +56,9 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.preference.ktx)
+    implementation(libs.recyclerview)
+    implementation(libs.fragment.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.room.runtime)
     implementation(libs.hiddenapibypass)
     implementation(libs.appiconloader)

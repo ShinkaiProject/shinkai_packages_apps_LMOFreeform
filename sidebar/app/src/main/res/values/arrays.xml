@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string-array name="sidebar_position_entries">
+        <item>@string/sidebar_left</item>
+        <item>@string/sidebar_right</item>
+    </string-array>
+    <string-array name="sidebar_position_values">
+        <item>-1</item>
+        <item>1</item>
+    </string-array>
 </resources>

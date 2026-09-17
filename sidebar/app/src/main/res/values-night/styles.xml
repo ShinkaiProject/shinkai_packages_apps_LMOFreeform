@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.Dark" />
+    <style name="AppTheme" parent="Theme.SubSettingsBase" />
     
-    <style name="Theme.SidebarPerAppConfig" parent="Theme.Material3.DayNight">
-    </style>
+    <style name="Theme.SidebarSettings" parent="Theme.SubSettingsBase" />
 </resources>

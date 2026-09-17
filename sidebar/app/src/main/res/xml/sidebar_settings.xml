@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="sideline"
+        android:title="@string/enable_sideline"
+        android:defaultValue="false"
+        android:persistent="false"
+        app:iconSpaceReserved="false" />
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="sidebar_auto_enable_selected_apps"
+        android:title="@string/sidebar_auto_enable_selected_apps"
+        android:summary="@string/sidebar_auto_enable_selected_apps_summary"
+        android:defaultValue="false"
+        android:persistent="false"
+        app:iconSpaceReserved="false" />
+
+    <Preference
+        android:key="sidebar_per_app_config"
+        android:title="@string/sidebar_per_app_config"
+        android:summary="@string/sidebar_per_app_config_summary"
+        app:iconSpaceReserved="false" />
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="sidebar_show_predicted_apps"
+        android:title="@string/sidebar_predicted_apps"
+        android:summary="@string/sidebar_predicted_apps_summary"
+        android:defaultValue="true"
+        android:persistent="false"
+        app:iconSpaceReserved="false" />
+
+    <PreferenceCategory
+        android:key="pinned_apps_category"
+        android:title="@string/sidebar_app_setting_label"
+        app:iconSpaceReserved="false" />
+
+</PreferenceScreen>
