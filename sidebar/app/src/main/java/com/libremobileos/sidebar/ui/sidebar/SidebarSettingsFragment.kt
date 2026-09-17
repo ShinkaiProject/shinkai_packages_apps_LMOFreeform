@@ -52,7 +52,7 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
         super.onViewCreated(view, savedInstanceState)
         val context = requireContext()
 
-        masterSwitch = findPreference(KEY_MASTER)?.apply {
+        masterSwitch = findPreference<SwitchPreferenceCompat>(KEY_MASTER)?.apply {
             isChecked = viewModel.getSidebarEnabled()
             isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
@@ -64,7 +64,7 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
             }
         }
 
-        autoEnableSwitch = findPreference(KEY_AUTO_ENABLE)?.apply {
+        autoEnableSwitch = findPreference<SwitchPreferenceCompat>(KEY_AUTO_ENABLE)?.apply {
             isChecked = viewModel.isEnabled && viewModel.getAutoEnableSelectedAppsEnabled()
             isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
@@ -76,14 +76,14 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
             }
         }
 
-        perAppPreference = findPreference(KEY_PER_APP)?.apply {
+        perAppPreference = findPreference<androidx.preference.Preference>(KEY_PER_APP)?.apply {
             setOnPreferenceClickListener {
                 startActivity(Intent(context, SidebarPerAppConfigActivity::class.java))
                 true
             }
         }
 
-        predictedPreference = findPreference(KEY_PREDICTED)?.apply {
+        predictedPreference = findPreference<SwitchPreferenceCompat>(KEY_PREDICTED)?.apply {
             isChecked = viewModel.isEnabled && viewModel.getPredictedAppsEnabled()
             isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
