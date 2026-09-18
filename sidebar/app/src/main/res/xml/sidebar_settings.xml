@@ -9,6 +9,11 @@
         android:persistent="false"
         app:iconSpaceReserved="false" />
 
+    <Preference
+        android:key="sidebar_customization"
+        android:title="@string/sidebar_customization_title"
+        app:iconSpaceReserved="false" />
+
     <androidx.preference.SwitchPreferenceCompat
         android:key="sidebar_auto_enable_selected_apps"
         android:title="@string/sidebar_auto_enable_selected_apps"

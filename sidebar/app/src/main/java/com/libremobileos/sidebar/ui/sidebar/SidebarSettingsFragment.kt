@@ -76,6 +76,11 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
             }
         }
 
+        findPreference<androidx.preference.Preference>("sidebar_customization")?.setOnPreferenceClickListener {
+            startActivity(Intent(context, SidebarCustomizationActivity::class.java))
+            true
+        }
+
         perAppPreference = findPreference<androidx.preference.Preference>(KEY_PER_APP)?.apply {
             setOnPreferenceClickListener {
                 startActivity(Intent(context, SidebarPerAppConfigActivity::class.java))
