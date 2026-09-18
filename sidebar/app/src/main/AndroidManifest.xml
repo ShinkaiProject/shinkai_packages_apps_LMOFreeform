@@ -58,6 +58,11 @@
             android:exported="false"
             android:theme="@style/Theme.SidebarSettings"/>
 
+        <activity
+            android:name=".ui.sidebar.PinnedAppsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SidebarSettings"/>
+
         <service android:name=".service.SidebarService"/>
         <service android:name=".service.SidebarMonitorService"/>
 

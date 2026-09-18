@@ -2,43 +2,53 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.preference.SwitchPreferenceCompat
+    <com.android.settingslib.widget.MainSwitchPreference
         android:key="sideline"
         android:title="@string/enable_sideline"
         android:defaultValue="false"
         android:persistent="false"
         app:iconSpaceReserved="false" />
 
-    <Preference
-        android:key="sidebar_customization"
-        android:title="@string/sidebar_customization_title"
+    <PreferenceCategory
+        android:key="sidebar_auto_enable_selected_category"
+        android:title="@string/sidebar_auto_enable_selected_category"
         app:iconSpaceReserved="false" />
 
-    <androidx.preference.SwitchPreferenceCompat
-        android:key="sidebar_auto_enable_selected_apps"
-        android:title="@string/sidebar_auto_enable_selected_apps"
-        android:summary="@string/sidebar_auto_enable_selected_apps_summary"
-        android:defaultValue="false"
-        android:persistent="false"
-        app:iconSpaceReserved="false" />
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_auto_enable_selected_apps"
+            android:title="@string/sidebar_auto_enable_selected_apps"
+            android:summary="@string/sidebar_auto_enable_selected_apps_summary"
+            android:defaultValue="false"
+            android:persistent="false"
+            app:iconSpaceReserved="false" />
 
-    <Preference
-        android:key="sidebar_per_app_config"
-        android:title="@string/sidebar_per_app_config"
-        android:summary="@string/sidebar_per_app_config_summary"
-        app:iconSpaceReserved="false" />
-
-    <androidx.preference.SwitchPreferenceCompat
-        android:key="sidebar_show_predicted_apps"
-        android:title="@string/sidebar_predicted_apps"
-        android:summary="@string/sidebar_predicted_apps_summary"
-        android:defaultValue="true"
-        android:persistent="false"
-        app:iconSpaceReserved="false" />
+        <Preference
+            android:key="sidebar_per_app_config"
+            android:title="@string/sidebar_per_app_config"
+            android:summary="@string/sidebar_per_app_config_summary"
+            app:iconSpaceReserved="false" />
 
     <PreferenceCategory
-        android:key="pinned_apps_category"
-        android:title="@string/sidebar_app_setting_label"
-        app:iconSpaceReserved="false" />
+        android:key="sidebar_customization_category"
+        android:title="@string/sidebar_customization_category"
+        app:iconSpaceReserved="false" />        
+
+       <androidx.preference.SwitchPreferenceCompat
+            android:key="sidebar_show_predicted_apps"
+            android:title="@string/sidebar_predicted_apps"
+            android:summary="@string/sidebar_predicted_apps_summary"
+            android:defaultValue="true"
+            android:persistent="false"
+            app:iconSpaceReserved="false" />
+
+       <Preference
+            android:key="pinned_apps_category"
+            android:title="@string/sidebar_app_setting_label"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="sidebar_customization"
+            android:title="@string/sidebar_customization_title"
+            app:iconSpaceReserved="false" />
 
 </PreferenceScreen>
