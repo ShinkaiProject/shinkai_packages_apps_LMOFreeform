@@ -40,6 +40,7 @@
     <string name="sidebar_column_spacing_summary">Space between columns</string>
     <string name="sidebar_corner_radius_value">Corner radius: %1$d dp</string>
     <string name="sidebar_bg_transparency_value">Background transparency: %1$.2f</string>
+    <string name="sidebar_reset_category">Reset</string>
     <string name="sidebar_reset_defaults">Reset to defaults</string>
 
     <!-- Visual effects -->

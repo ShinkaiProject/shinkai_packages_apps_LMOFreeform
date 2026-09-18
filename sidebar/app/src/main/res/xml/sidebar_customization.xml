@@ -161,9 +161,16 @@
 
     </PreferenceCategory>
 
-    <Preference
-        android:key="sidebar_reset_defaults"
-        android:title="@string/sidebar_reset_defaults"
+    <PreferenceCategory
+        android:key="sidebar_reset_category"
+        android:title="@string/sidebar_reset_category"
         app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="sidebar_reset_defaults"
+            android:title="@string/sidebar_reset_defaults"
+            app:iconSpaceReserved="false" />        
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
