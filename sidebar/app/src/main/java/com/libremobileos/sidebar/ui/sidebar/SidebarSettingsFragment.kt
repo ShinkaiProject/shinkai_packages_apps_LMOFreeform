@@ -32,6 +32,7 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
     private var perAppPreference: androidx.preference.Preference? = null
     private var predictedPreference: SwitchPreferenceCompat? = null
     private var pinnedAppsPreference: androidx.preference.Preference? = null
+    private var customizationPreference: androidx.preference.Preference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +62,6 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
 
         autoEnableSwitch = findPreference<SwitchPreferenceCompat>(KEY_AUTO_ENABLE)?.apply {
             isChecked = viewModel.isEnabled && viewModel.getAutoEnableSelectedAppsEnabled()
-            isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
                 val enabled = newValue as Boolean
                 viewModel.setAutoEnableSelectedAppsEnabled(enabled)
@@ -71,9 +71,11 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
             }
         }
 
-        findPreference<androidx.preference.Preference>("sidebar_customization")?.setOnPreferenceClickListener {
-            startActivity(Intent(context, SidebarCustomizationActivity::class.java))
-            true
+        customizationPreference = findPreference<androidx.preference.Preference>("sidebar_customization")?.apply {
+            setOnPreferenceClickListener {
+                startActivity(Intent(context, SidebarCustomizationActivity::class.java))
+                true
+            }
         }
 
         pinnedAppsPreference = findPreference<androidx.preference.Preference>(KEY_PINNED_CATEGORY)?.apply {
@@ -92,7 +94,6 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
 
         predictedPreference = findPreference<SwitchPreferenceCompat>(KEY_PREDICTED)?.apply {
             isChecked = viewModel.isEnabled && viewModel.getPredictedAppsEnabled()
-            isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
                 viewModel.setPredictedAppsEnabled(newValue as Boolean)
                 true
@@ -112,9 +113,12 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
         val enabledUser = viewModel.isEnabled
         val master = enabledUser && viewModel.getSidebarEnabled()
         val autoEnable = enabledUser && viewModel.getAutoEnableSelectedAppsEnabled()
-        perAppPreference?.isVisible = autoEnable
-        predictedPreference?.isVisible = master
-        pinnedAppsPreference?.isVisible = master
+
+        autoEnableSwitch?.isEnabled = enabledUser
+        perAppPreference?.isEnabled = autoEnable
+        predictedPreference?.isEnabled = master
+        pinnedAppsPreference?.isEnabled = master
+        customizationPreference?.isEnabled = master
     }
 
     private fun updateMonitorService(context: android.content.Context, enabled: Boolean) {
