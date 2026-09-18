@@ -7,13 +7,14 @@
         android:title="@string/sidebar_section_slider"
         app:iconSpaceReserved="false">
 
-        <com.libremobileos.sidebar.preference.FloatSliderPreference
+        <com.android.settingslib.widget.SliderPreference
             android:key="slider_transparency"
             android:title="@string/sidebar_transparency_value"
-            android:defaultValue="0.8"
-            app:floatMin="0.1"
-            app:floatMax="1.0"
-            app:floatStep="0.1"
+            android:defaultValue="8"
+            android:persistent="false"
+            app:min="1"
+            android:max="10"
+            app:seekBarIncrement="1"
             app:iconSpaceReserved="false" />
 
         <com.android.settingslib.widget.SliderPreference
@@ -82,22 +83,24 @@
             android:max="12"
             app:iconSpaceReserved="false" />
 
-        <com.libremobileos.sidebar.preference.FloatSliderPreference
+        <com.android.settingslib.widget.SliderPreference
             android:key="sidebar_corner_radius"
             android:title="@string/sidebar_corner_radius_value"
-            android:defaultValue="24.0"
-            app:floatMin="0.0"
-            app:floatMax="32.0"
-            app:floatStep="1.0"
+            android:defaultValue="24"
+            android:persistent="false"
+            app:min="0"
+            android:max="32"
+            app:seekBarIncrement="1"
             app:iconSpaceReserved="false" />
 
-        <com.libremobileos.sidebar.preference.FloatSliderPreference
+        <com.android.settingslib.widget.SliderPreference
             android:key="sidebar_background_transparency"
             android:title="@string/sidebar_bg_transparency_value"
-            android:defaultValue="0.8"
-            app:floatMin="0.1"
-            app:floatMax="1.0"
-            app:floatStep="0.1"
+            android:defaultValue="8"
+            android:persistent="false"
+            app:min="1"
+            android:max="10"
+            app:seekBarIncrement="1"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>

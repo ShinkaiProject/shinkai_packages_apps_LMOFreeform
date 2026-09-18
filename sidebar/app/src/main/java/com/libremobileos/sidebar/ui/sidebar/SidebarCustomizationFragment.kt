@@ -15,6 +15,7 @@ import com.libremobileos.sidebar.R
 import com.libremobileos.sidebar.preference.ConfigDataStore
 import com.libremobileos.sidebar.preference.FloatSliderPreference
 import com.libremobileos.sidebar.preference.IntegerListPreference
+import kotlin.math.roundToInt
 
 class SidebarCustomizationFragment : SettingsBasePreferenceFragment() {
 
@@ -41,30 +42,13 @@ class SidebarCustomizationFragment : SettingsBasePreferenceFragment() {
         }
     }
 
+    private val configStore: ConfigDataStore
+        get() = preferenceManager.preferenceDataStore as ConfigDataStore
+
     private fun setupSliders() {
-        findPreference<FloatSliderPreference>("slider_transparency")?.apply {
-            title = formatFloatTitle(R.string.sidebar_transparency_value, getFloatValue())
-            setOnPreferenceChangeListener { pref, newValue ->
-                pref.title = formatFloatTitle(R.string.sidebar_transparency_value, newValue as Float)
-                true
-            }
-        }
-
-        findPreference<FloatSliderPreference>("sidebar_corner_radius")?.apply {
-            title = formatFloatTitle(R.string.sidebar_corner_radius_value, getFloatValue())
-            setOnPreferenceChangeListener { pref, newValue ->
-                pref.title = formatFloatTitle(R.string.sidebar_corner_radius_value, newValue as Float)
-                true
-            }
-        }
-
-        findPreference<FloatSliderPreference>("sidebar_background_transparency")?.apply {
-            title = formatFloatTitle(R.string.sidebar_bg_transparency_value, getFloatValue())
-            setOnPreferenceChangeListener { pref, newValue ->
-                pref.title = formatFloatTitle(R.string.sidebar_bg_transparency_value, newValue as Float)
-                true
-            }
-        }
+        setupFloatSlider("slider_transparency", R.string.sidebar_transparency_value, 10, 0.8f)
+        setupFloatSlider("sidebar_corner_radius", R.string.sidebar_corner_radius_value, 1, 24f)
+        setupFloatSlider("sidebar_background_transparency", R.string.sidebar_bg_transparency_value, 10, 0.8f)
 
         setupIntSlider("slider_length", R.string.sidebar_length_value)
         setupIntSlider("slider_width", R.string.sidebar_width_value)
@@ -78,6 +62,20 @@ class SidebarCustomizationFragment : SettingsBasePreferenceFragment() {
     private fun formatFloatTitle(resId: Int, value: Float): String =
         FloatSliderPreference.formatValue(getString(resId), value)
 
+    private fun setupFloatSlider(key: String, titleRes: Int, scale: Int, defaultFloat: Float) {
+        findPreference<SliderPreference>(key)?.apply {
+            val storedFloat = configStore.getFloat(key, defaultFloat)
+            value = (storedFloat * scale).roundToInt()
+            title = formatFloatTitle(titleRes, storedFloat)
+            setOnPreferenceChangeListener { pref, newValue ->
+                val floatValue = (newValue as Int) / scale.toFloat()
+                configStore.putFloat(key, floatValue)
+                pref.title = formatFloatTitle(titleRes, floatValue)
+                true
+            }
+        }
+    }
+
     private fun setupIntSlider(key: String, titleRes: Int) {
         findPreference<SliderPreference>(key)?.apply {
             title = getString(titleRes, value)
@@ -89,15 +87,10 @@ class SidebarCustomizationFragment : SettingsBasePreferenceFragment() {
     }
 
     private fun refreshSliderTitles() {
-        findPreference<FloatSliderPreference>("slider_transparency")?.let { pref ->
-            pref.title = formatFloatTitle(R.string.sidebar_transparency_value, pref.getFloatValue())
-        }
-        findPreference<FloatSliderPreference>("sidebar_corner_radius")?.let { pref ->
-            pref.title = formatFloatTitle(R.string.sidebar_corner_radius_value, pref.getFloatValue())
-        }
-        findPreference<FloatSliderPreference>("sidebar_background_transparency")?.let { pref ->
-            pref.title = formatFloatTitle(R.string.sidebar_bg_transparency_value, pref.getFloatValue())
-        }
+        refreshFloatSliderTitle("slider_transparency", R.string.sidebar_transparency_value, 10)
+        refreshFloatSliderTitle("sidebar_corner_radius", R.string.sidebar_corner_radius_value, 1)
+        refreshFloatSliderTitle("sidebar_background_transparency", R.string.sidebar_bg_transparency_value, 10)
+
         refreshIntSliderTitle("slider_length", R.string.sidebar_length_value)
         refreshIntSliderTitle("slider_width", R.string.sidebar_width_value)
         refreshIntSliderTitle("sidebar_columns", R.string.sidebar_columns_value)
@@ -113,10 +106,25 @@ class SidebarCustomizationFragment : SettingsBasePreferenceFragment() {
         }
     }
 
+    private fun refreshFloatSliderTitle(key: String, titleRes: Int, scale: Int) {
+        findPreference<SliderPreference>(key)?.let { pref ->
+            pref.title = formatFloatTitle(titleRes, pref.value / scale.toFloat())
+        }
+    }
+
     private fun resetDefaults() {
-        findPreference<FloatSliderPreference>("slider_transparency")?.setValue(0.80f)
-        findPreference<FloatSliderPreference>("sidebar_corner_radius")?.setValue(24f)
-        findPreference<FloatSliderPreference>("sidebar_background_transparency")?.setValue(0.80f)
+        findPreference<SliderPreference>("slider_transparency")?.apply {
+            setValue(8)
+            configStore.putFloat("slider_transparency", 0.8f)
+        }
+        findPreference<SliderPreference>("sidebar_corner_radius")?.apply {
+            setValue(24)
+            configStore.putFloat("sidebar_corner_radius", 24f)
+        }
+        findPreference<SliderPreference>("sidebar_background_transparency")?.apply {
+            setValue(8)
+            configStore.putFloat("sidebar_background_transparency", 0.8f)
+        }
 
         findPreference<SliderPreference>("slider_length")?.setValue(200)
         findPreference<SliderPreference>("slider_width")?.setValue(100)
