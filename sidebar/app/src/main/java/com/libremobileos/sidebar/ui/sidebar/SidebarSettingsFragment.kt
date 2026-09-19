@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.preference.SwitchPreferenceCompat
+import com.android.settingslib.widget.MainSwitchPreference
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
 import com.libremobileos.sidebar.R
 import com.libremobileos.sidebar.preference.ConfigDataStore
@@ -27,7 +28,7 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
 
     private val viewModel: SidebarSettingsViewModel by viewModels { SidebarSettingsViewModel.Factory }
 
-    private var masterSwitch: SwitchPreferenceCompat? = null
+    private var masterSwitch: MainSwitchPreference? = null
     private var autoEnableSwitch: SwitchPreferenceCompat? = null
     private var perAppPreference: androidx.preference.Preference? = null
     private var predictedPreference: SwitchPreferenceCompat? = null
@@ -48,7 +49,7 @@ class SidebarSettingsFragment : SettingsBasePreferenceFragment() {
         super.onViewCreated(view, savedInstanceState)
         val context = requireContext()
 
-        masterSwitch = findPreference<SwitchPreferenceCompat>(KEY_MASTER)?.apply {
+        masterSwitch = findPreference<MainSwitchPreference>(KEY_MASTER)?.apply {
             isChecked = viewModel.getSidebarEnabled()
             isEnabled = viewModel.isEnabled
             setOnPreferenceChangeListener { _, newValue ->
